@@ -20,40 +20,39 @@
       ></v-text-field>
 
       <v-text-field
-        v-model="formData.section.content.studentNo"
+        v-model="formData.section.sectionContent.studentNo"
         :rules="studentIdRules"
         label="学号"
         required
       ></v-text-field>
       
       <date-picker
-        v-model="formData.section.content.bornDate"
+        v-model="formData.section.sectionContent.bornDate"
         labelName="出生年月"
         :rules="bornDateRules"
         required
       ></date-picker>
-
       <v-radio-group v-model="formData.resume.sex" :mandatory="false" row>
         <v-radio label="男" value="true"></v-radio>
         <v-radio label="女" value="false"></v-radio>
       </v-radio-group>
 
       <v-text-field
-        v-model="formData.section.content.workCity"
+        v-model="formData.section.sectionContent.workCity"
         :rules="cityRules"
         label="所在城市"
         required
       ></v-text-field>
 
       <v-text-field
-        v-model="formData.section.content.email"
+        v-model="formData.section.sectionContent.email"
         :rules="emailRules"
         label="邮箱"
         required
       ></v-text-field>
 
       <date-picker
-        v-model="formData.section.content.startWorkDate"
+        v-model="formData.section.sectionContent.startWorkDate"
         labelName="参加工作时间"
         :rules="startWorkDateRules"
         required
@@ -66,6 +65,7 @@
 <script>
 
 import DatePicker from '@/components/DatePicker.vue';
+import { setTimeout } from 'timers';
 
 export default {
   props: {
@@ -103,34 +103,50 @@ export default {
   },
   computed: {
     formData: function() {
+      console.log('子组件', this.basicInfoData)
+      var sectionTemplate = {
+        resumeId: "",
+        sectionName: "baseExtend",
+        sectionContent: {studentNo: "", bornDate: "", workCity: "", email: "", startWorkDate: ""}
+      };
+      var resumeTemplate = {
+        id:"",
+        userId:"",
+        name:"",
+        sex: true,
+        age: '',
+        province: "",
+        city: "",
+        imgPath: "",
+        mobilePhone: "",
+        language: "zh-cn"
+      };
       if (this.basicInfoData.resume === null) {
+        console.log('1')
         return {
-          resume:{
-              id:"",
-              userId:"",
-              name:"",
-              sex: true,
-              age: '',
-              province: "",
-              city: "",
-              imgPath: "",
-              mobilePhone: "",
-              language: "zh-cn"
-          },
-          section:{
-            id: "",
-            resumeId: "",
-            name:"baseExtend",
-            content: {"studentNo": "", "bornDate": "", "workCity": "", "email": "", "startWorkDate": ""}
-          }
+          resume: resumeTemplate,
+          section: sectionTemplate,
         }
+      } else if (this.basicInfoData.section.resumeId === undefined) {
+        console.log('2')
+        var data = {
+          resume: this.basicInfoData.resume,
+          section: sectionTemplate,
+        };
+        return data;
       } else {
-        return this.basicInfoData;
+        console.log('3')
+        sectionTemplate.resumeId = this.basicInfoData.section.resumeId;
+        sectionTemplate.sectionName = this.basicInfoData.section.name;
+        sectionTemplate.sectionContent = {"studentNo": "", "bornDate": "", "workCity": "", "email": "", "startWorkDate": ""};
+        return Object.assign({}, this.basicInfoData, { section: sectionTemplate});
       }
     }
   },
   created: function() {
+    console.log('create', this.basicInfoData);
     this.$eventBus.$on('save-form', () => {
+      console.log('子组件数据', this.formData);
       this.$emit('save-form-data', this.formData);
     });
   },

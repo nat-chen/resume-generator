@@ -6,7 +6,7 @@
       lazy-validation
     >
       <v-textarea
-        v-model="formData.content.selfdesp"
+        v-model="formData.sectionContent.selfdesp"
         auto-grow
         name="selfIntroduction"
         label="自我描述"
@@ -16,7 +16,7 @@
       ></v-textarea>
 
       <v-text-field
-        v-model="formData.content.socialLink"
+        v-model="formData.sectionContent.socialLink"
         :rules="socialNetworkRules"
         label="社交主页"
         required
@@ -48,16 +48,17 @@ export default {
   },
   computed: {
     formData: function() {
-      if (this.othersData === null) {
-        return {
-            id: "",
-            resumeId: "",
-            name: "other",
-            content: { selfdesp: "", socialLink: "" }
-        }
-      } else {
-        return this.othersData;
+      var sectionTemplate = {
+        resumeId: "",
+        sectionName: "other",
+        sectionContent: { selfdesp: "", socialLink: "" }
       }
+      if (this.othersData.resumeId !== undefined) {
+        sectionTemplate.resumeId = this.othersData.resumeId;
+        sectionTemplate.sectionName = this.othersData.name;
+        sectionTemplate.sectionContent =this.othersData.content;
+      }
+      return sectionTemplate;
     },
   },
   created: function() {

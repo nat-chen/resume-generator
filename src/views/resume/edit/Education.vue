@@ -5,7 +5,7 @@
     </v-btn>
     <v-form class="grey lighten-3 my-4 pa-2"
       ref="form"
-      v-for="(item, index) in formData.content"
+      v-for="(item, index) in formData.sectionContent"
       :key="index"
       v-model="isFormValid"
       lazy-validation
@@ -80,16 +80,17 @@ export default {
   },
   computed: {
     formData: function() {
-      if (this.educationData === null) {
-        return {
-            id: "",
-            resumeId: "",
-            name: "education",
-            content: [{collegeName: "", startDate: "", endDate: "", subject: "", maxGrade: ""}]
-        }
-      } else {
-        return this.educationData;
+      var sectionTemplate = {
+        resumeId: "",
+        sectionName: "education",
+        sectionContent: [{collegeName: "", startDate: "", endDate: "", subject: "", maxGrade: ""}]
       }
+      if (this.educationData.resumeId !== undefined) {
+        sectionTemplate.resumeId = this.educationData.resumeId;
+        sectionTemplate.sectionName = this.educationData.name;
+        sectionTemplate.sectionContent =this.educationData.content;
+      }
+      return sectionTemplate;
     },
     startTimeList: function() {
       return Array.from({length: 69}, function(item, index) {
@@ -115,14 +116,14 @@ export default {
   },
   methods: {
     addNewItem: function() {
-      var oldData = this.formData.content;
+      var oldData = this.formData.sectionContent;
       var newItem = oldData.slice(-1).map((item) => {
         item = '';
       });
       oldData.push(newItem);
     },
     deleteSelectedItem: function(index) {
-      this.formData.content.splice(index, 1);
+      this.formData.sectionContent.splice(index, 1);
     },
 
   },

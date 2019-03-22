@@ -5,7 +5,7 @@
     </v-btn>
 
     <v-form class="grey lighten-3 my-4 pa-2" 
-      v-for="(item, index) in formData.content" :key="index"
+      v-for="(item, index) in formData.sectionContent" :key="index"
       ref="form"
       v-model="isFormValid"
       lazy-validation
@@ -110,16 +110,17 @@ export default {
   },
   computed: {
     formData: function() {
-      if (this.workExperienceData === null) {
-        return {
-            id: "",
-            resumeId: "",
-            name: "workExperience",
-            content: [{companyName: "", domain: "", dept: "", title: "", startDate: "", endDate: "", summary: ""}]
-        }
-      } else {
-        return this.workExperienceData;
+      var sectionTemplate = {
+        resumeId: "",
+        sectionName: "workExperience",
+        sectionContent: [{companyName: "", domain: "", dept: "", title: "", startDate: "", endDate: "", summary: ""}],
       }
+      if (this.workExperienceData.resumeId !== undefined) {
+        sectionTemplate.resumeId = this.workExperienceData.resumeId;
+        sectionTemplate.sectionName = this.workExperienceData.name;
+        sectionTemplate.sectionContent =this.workExperienceData.content;
+      }
+      return sectionTemplate;
     },
   },
   created: function() {
@@ -132,14 +133,14 @@ export default {
   },
   methods: {
     addNewItem: function() {
-      var oldData = this.formData.content;
+      var oldData = this.formData.sectionContent;
       var newItem = oldData.slice(-1).map((item) => {
         item = '';
       });
       oldData.push(newItem);
     },
     deleteSelectedItem: function(index) {
-      this.formData.content.splice(index, 1);
+      this.formData.sectionContent.splice(index, 1);
     },
   },
   components: {

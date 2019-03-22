@@ -6,7 +6,7 @@
     <v-form
       ref="form" class="grey lighten-3 my-4 pa-2"
       v-model="isFormValid"
-      v-for="(item, index) in formData.content"
+      v-for="(item, index) in formData.sectionContent"
       :key="index"
       lazy-validation
     >
@@ -101,16 +101,17 @@ export default {
   },
   computed: {
     formData: function() {
-      if (this.projectExperienceData === null) {
-        return {
-            id: "",
-            resumeId: "",
-            name: "projectExperience",
-            content: [{projectName: "", title: "", startDate: "", endDate: "", summary: "", duty: ""}]
-        }
-      } else {
-        return this.projectExperienceData;
+      var sectionTemplate = {
+        resumeId: "",
+        sectionName: "projectExperience",
+        sectionContent: [{projectName: "", title: "", startDate: "", endDate: "", summary: "", duty: ""}]
       }
+      if (this.projectExperienceData.resumeId !== undefined) {
+        sectionTemplate.resumeId = this.projectExperienceData.resumeId;
+        sectionTemplate.sectionName = this.projectExperienceData.name;
+        sectionTemplate.sectionContent =this.projectExperienceData.content;
+      }
+      return sectionTemplate;
     },
   },
   created: function() {
@@ -123,14 +124,14 @@ export default {
   },
   methods: {
     addNewItem: function() {
-      var oldData = this.formData.content;
+      var oldData = this.formData.sectionContent;
       var newItem = oldData.slice(-1).map((item) => {
         item = '';
       });
       oldData.push(newItem);
     },
     deleteSelectedItem: function(index) {
-      this.formData.content.splice(index, 1);
+      this.formData.sectionContent.splice(index, 1);
     },
   },
   components: {

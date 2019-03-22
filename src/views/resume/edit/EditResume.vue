@@ -57,20 +57,23 @@ import Others from './Others.vue';
   export default {
     data: function() {
       return {
-        resumeData: null,
-        basicInfoData: null,
-        workExperienceData: null,
-        projectExperienceData: null,
-        educationData: null,
-        otherData: null,
+        resumeData: {},
+        basicInfoData: {},
+        workExperienceData: {},
+        projectExperienceData: {},
+        educationData: {},
+        otherData: {},
       }
     },
     computed: {
       dataList: function() {
-        console.log('dataList', [this.resumeData, this.basicInfoData, this.workExperienceData, this.projectExperienceData, this.educationData, this.otherData])
         return [this.resumeData, this.basicInfoData, this.workExperienceData, this.projectExperienceData, this.educationData, this.otherData];
       },
       mergeBasicData: function() {
+        console.log('merge', {
+          resume: this.resumeData,
+          section: this.basicInfoData,
+        });
         return {
           resume: this.resumeData,
           section: this.basicInfoData,
@@ -80,13 +83,15 @@ import Others from './Others.vue';
     created: function() {
       this.$axios.get('resume').then(response => {
         if (response.success === true) {
-          let resposneData = response.data;
-          this.resumeData = Object.assign({}, resposneData.resume);
-          this.basicInfoData = Object.assign({}, resposneData.sections[0]);
-          this.workExperienceData = Object.assign({}, resposneData.sections[2]);
-          this.projectExperienceData = Object.assign({}, resposneData.sections[4]);
-          this.educationData = Object.assign({}, resposneData.sections[1]);
-          this.otherData = Object.assign({}, resposneData.sections[3]);
+          //response 含 resume {...} 和 sections [] 空数组
+          let responseData = response.data;
+          this.resumeData = Object.assign({}, responseData.resume);
+          this.basicInfoData = Object.assign({}, responseData.sections[0] || {});
+          this.workExperienceData = Object.assign({}, responseData.sections[2] || {});
+          this.projectExperienceData = Object.assign({}, responseData.sections[4] || {});
+          this.educationData = Object.assign({}, responseData.sections[1] || {});
+          this.otherData = Object.assign({}, responseData.sections[3] || {});
+          console.log('basic', this.basicInfoData);
         }
       }).catch(error => {
         console.log(error)
@@ -98,19 +103,17 @@ import Others from './Others.vue';
     methods: {
       saveResumeData: function() {
         this.$nextTick(() => {
-          this.$axios.post('resume', JSON.stringify(this.resumeData)).then(response => {
+          this.$axios.post('resume', this.resumeData).then(response => {
             if (response.success === true) {
               let resumeId = response.data.id;
               if (localStorage.getItem('resumeId') === null) {
                 localStorage.setItem('resumeId', resumeId);
               }
-              if (this.resumeData.id === null) {
-                this.addResumeId(resumeId)
-              }
-              this.$nextTick(() => {
-                this.dataList.slice(1).forEach(item => {
-                console.log(JSON.parse(JSON.stringify(item)));
-                this.$axios.post('section', item).then(response => {
+              this.addResumeId(resumeId)
+              this.dataList.slice(1).forEach(item => {
+                var item = JSON.parse(JSON.stringify(item));
+                console.log('item', item)
+                this.$axios.post('section', Object.assign(item, { sectionContent: JSON.stringify(item.sectionContent)})).then(response => {
                   if (response.success === true) {
                     console.log('section 响应成功')
                   }
@@ -118,8 +121,6 @@ import Others from './Others.vue';
                   console.log(error)
                 });
               })
-              })
-              
             }
           }).catch(error => {
             console.log(error)
@@ -127,13 +128,13 @@ import Others from './Others.vue';
         })
       },
       saveFormData: function(data) {
-        console.log('data', data)
         if (data.resume !== undefined) {
           this.resumeData = data.resume;
           this.basicInfoData = data.section;
         } else {
-          this[`${data.name}Data`] = data;
+          this[`${data.sectionName}Data`] = data;
         }
+        console.log('子组件传给父组件', data)
       },
       addResumeId: function(id) {
         this.dataList.forEach(function(list, index) {
