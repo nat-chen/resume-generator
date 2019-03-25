@@ -52,12 +52,10 @@
         </v-layout>
       </v-card-actions>
     </v-card>
-    <snackbar :isSnackbarShow="isSnackbarShow" :snackbarText="snackbarText" @snackbar-display="snackbarDisplay"/>
   </div>
 </template>
 
 <script>
-import Snackbar from '@/components/Snackbar.vue';
 
 export default {
   name: 'login',
@@ -67,8 +65,6 @@ export default {
       password: '',
       isFormValid: false,
       isShowPassword: false,
-      snackbarText: '',
-      isSnackbarShow: false,
       mobileRules: [
         value => !!value || '手机号为必填项',
         value => /^1[3-9][0-9]{9}$/.test(value) || '手机号码格式无效'
@@ -81,22 +77,23 @@ export default {
   methods: {
     loginResumeSystem: function() {
       if (this.$refs.form.validate() === false) {
-        this.snackbarText = '请填写正确格式！'
-        this.isSnackbarShow = true;
+        this.$eventBus.$emit('invalid-status', true, '请填写正确格式！');
         return;
       };
       var data = {
         username: this.mobileNumber,
         password: this.password
       }
+      this.$eventBus.$emit('is-logging', true);
       this.$axios.post('login', data).then(response => {
         if (response.success === true) {
           const user = response.data.user;
           localStorage.setItem(user.account, user.passwd);
           this.$router.push({ path: `/edit/${user.id}` });
+          this.$eventBus.$emit('is-logging', false);
         } else {
-          this.isSnackbarShow = true;
-          this.snackbarText = '登陆失败, Bad credentials!'
+          this.$eventBus.$emit('invalid-status', true, '登陆失败, Bad credentials!');
+          this.$eventBus.$emit('is-logging', false);
           return;
         }
       }).catch(error => {
@@ -106,13 +103,7 @@ export default {
     registerNewAccount: function() {
       this.$eventBus.$emit('registerDialog')
     },
-    snackbarDisplay: function() {
-      this.isSnackbarShow = false;
-    }
   },
-  components: {
-    Snackbar,
-  }
 }
 </script>
 

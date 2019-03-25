@@ -76,8 +76,8 @@ export default {
     this.dropAndDropImage();
   },
   methods: {
-    upload: function() {
-      var file = this.$refs.imageInput.files[0];
+    upload: function(event, file) {
+      var file = file || this.$refs.imageInput.files[0];
       var fileReader  = new FileReader();
       const formData = new FormData();
       fileReader.onloadend = () => {
@@ -117,35 +117,14 @@ export default {
     },
     handleDrop: function(event) {
       var dt = event.dataTransfer
-      var files = dt.files
+      var files = dt.files;
+      this.upload(event, files[0]);
     },
     handleFiles: function(files) {
-        files = [...files]
-        files.forEach(uploadFile)
-        files.forEach(previewFile)
-      }
+      files = [...files]
+      files.forEach(this.upload);
     },
-    previewImage: function(file) {
-      let reader = new FileReader()
-      reader.readAsDataURL(file)
-      reader.onloadend = () => {
-        img.src = reader.result
-      }
-    },
-    uploadFile: function(file) {
-      var url = 'https://api.cloudinary.com/v1_1/joezimim007/image/upload'
-      var xhr = new XMLHttpRequest()
-      var formData = new FormData()
-      xhr.open('POST', url, true)
-      xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest')
-      xhr.upload.addEventListener("progress", function(event) {
-        console.log(event)
-      })
-
-      formData.append('upload_preset', 'ujpu6gyk')
-      formData.append('file', file)
-      xhr.send(formData)
-    }
+  }
 }
 </script>
 <style lang="scss" scoped>

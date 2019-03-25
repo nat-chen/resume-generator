@@ -65,28 +65,29 @@ export default {
   methods: {
     createNewAccount: function() {
       if (this.$refs.form.validate() === false) {
-        this.snackbarText = '请填写正确格式！'
-        this.snackbar = true;
+        this.$eventBus.$emit('invalid-status', true, '请填写正确格式！');
         return;
       };
       var data = {
         password: this.password,
         username: this.mobileNumber
       };
+      this.$eventBus.$emit('is-logging', true);
       this.$axios.post('register', data).then(response => {
         if (response.success === true) {
           const user = response.data.user;
           this.$router.push({ path: `/edit/${user.id}` });
           this.registerDialog = false;
+          this.$eventBus.$emit('is-logging', false);
         } else if (response.msg === '用户已存在') {
-          this.snackbarText = '用户已存在！'
-          this.snackbar = true;
+          this.$eventBus.$emit('invalid-status', true, '用户已存在');
+          this.$eventBus.$emit('is-logging', false);
         }
         
       }).catch(error => {
         console.log(error)
       });
-    }
+    },
   }
 }
 </script>
