@@ -93,7 +93,7 @@ axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded
 */
 function get(path, params){    
   return new Promise((resolve, reject) =>{        
-      axios.get(url[path], {            
+      axios.get(url[path] || path, {            
           params: params        
       })        
       .then(res => {            

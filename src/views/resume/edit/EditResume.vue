@@ -1,13 +1,12 @@
 <template>
   <v-container fluid pa-0>
     <toolbar @save-resume-data="saveResumeData"></toolbar>
-
     <v-stepper vertical non-linear>
       <v-stepper-step step="1" editable>
         基本信息
       </v-stepper-step>
       <v-stepper-content step="1">
-        <!-- <image-upload /> -->
+        <image-upload @uploaded-image="uploadedImage" :imgPath="imgPath" />
         <basic-personal-info :mergeBasicData="mergeBasicData" @save-form-data="saveFormData"/>
       </v-stepper-content>
 
@@ -42,11 +41,13 @@
       </v-stepper-content>
       
     </v-stepper>
+    <snackbar :isSnackbarShow="isSnackbarShow" :snackbarText="snackbarText" @snackbar-display="snackbarDisplay"/>
   </v-container>
 </template>
 
 <script>
-// import ImageUpload from './ImageUpload.vue';
+import ImageUpload from '@/components/ImageUpload.vue';
+import Snackbar from '@/components/Snackbar.vue';
 import Toolbar from './Toolbar.vue';
 import BasicPersonalInfo from './BasicPersonalInfo.vue';
 import WorkExperience from './WorkExperience.vue';
@@ -57,14 +58,15 @@ import Others from './Others.vue';
   export default {
     data: function() {
       return {
-        basicData: {
-
-        },
+        basicData: {},
         baseExtendData: {}, 
         workExperienceData: {},
         projectExperienceData: {},
         educationData: {},
         otherData: {},
+        isSnackbarShow: false,
+        snackbarText: '登录状态过期，请重新登录！',
+        imgPath: '',
       }
     },
     computed: {
@@ -84,20 +86,20 @@ import Others from './Others.vue';
           this.processResponseData(response.data);
         }
       }).catch(error => {
-        console.log(error)
+        this.isSnackbarShow = true;
       });
     },
     beforeDestroy: function() {
 
     },
     methods: {
+      uploadedImage: function(path) {
+        this.$set(this.basicData, 'imgPath', path);
+      },
       saveResumeData: function() {
           this.$axios.post('resume', this.basicData).then(response => {
             if (response.success === true) {
               let resumeId = response.data.id;
-              // if (localStorage.getItem('resumeId') === null) {
-              //   localStorage.setItem('resumeId', resumeId);
-              // }
               this.addResumeId(resumeId);
               this.dataList.slice(1).forEach(item => {
                 var data = Object.assign({}, item, {
@@ -105,10 +107,11 @@ import Others from './Others.vue';
                 });
                 this.$axios.post('section', data).then(response => {
                   if (response.success === true) {
-                    console.log('section 响应成功')
+                    console.log('section 响应成功');
                   }
                 }).catch(error => {
-                  console.log(error)
+                  this.snackbarText = '保存失败，请刷新重试！'
+                  this.isSnackbarShow = true;
                 });
               })
             }
@@ -136,6 +139,7 @@ import Others from './Others.vue';
       processResponseData: function(data) {
         if (data.resume !== null) {
           this.basicData = Object.assign({}, this.basicData, data.resume);
+          this.imgPath = this.basicData.imgPath;
           data.sections.forEach((item) => {
             var dataName = `${item.name}Data`;
             this[dataName] = Object.assign({}, this[dataName], {
@@ -146,15 +150,19 @@ import Others from './Others.vue';
           })
         }
       },
+      snackbarDisplay: function() {
+        this.isSnackbarShow = false;
+      }
     },
     components: {
-      // ImageUpload,
+      ImageUpload,
       BasicPersonalInfo,
       WorkExperience,
       ProjectExperience,
       Education,
       Others,
       Toolbar,
+      Snackbar,
     }
   }
 </script>

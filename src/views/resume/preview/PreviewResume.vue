@@ -1,11 +1,12 @@
 <template>
   <v-layout>
     <v-flex>
-      <v-card class='pa-1'>
+      <v-card color="blue-grey lighten-5" class='pa-1'>
         <v-layout justify-center align-center row>
           <v-layout justify-center>
             <v-avatar size="80">
-              <img src="https://cdn.vuetifyjs.com/images/cards/docks.jpg">
+              <img v-if="basicPersonalData.imgPath !== ''" :src="basicPersonalData.imgPath | imagePathFilter">
+              <img v-else :src="defaultAvatar">
             </v-avatar>
           </v-layout>
 
@@ -13,7 +14,9 @@
             <v-card-title class='pb-0'>
               <div>
                 <span class="title">{{ basicPersonalData.name }}</span>&nbsp;&nbsp;
-                <v-icon small>search</v-icon>&nbsp;&nbsp;
+                <v-icon v-if="basicPersonalData.sex === false" small>fa-venus</v-icon>
+                <v-icon v-else small>fa-mars</v-icon>
+                &nbsp;&nbsp;
                 <span>{{ basicPersonalData.studentNo }}</span>
               </div>
             </v-card-title>
@@ -50,6 +53,7 @@
         <v-card-text class="px-4">
           {{ selfDescription }}
         </v-card-text>
+        <v-divider></v-divider>
       </v-card>
 
       <section-details 
@@ -58,7 +62,6 @@
         :itemDetails="list"
       >
       </section-details>
-
 
     </v-flex>
   </v-layout>
@@ -71,92 +74,72 @@ export default {
   name: 'previewResume',
   data: function() {
     return {
-      resumeData: {
-        resume: {
-          id: "2c908087694bea8101699d18b9640055",
-          userId: "2c908087694bea810169674ac3fd000f",
-          name: "nat chen",
-          sex: false,
-          age: null,
-          province: "",
-          city: null,
-          imgPath: "",
-          mobilePhone: "18665949858",
-          language: "zh-cn"
-        },
-        sections: [
-          {
-            id: "2c908087694bea8101699d18bbe40056",
-            resumeId: "2c908087694bea8101699d18b9640055",
-            name: "baseExtend",
-            content:
-              {"studentNo":"2019","bornDate":"2019-03","workCity":"深圳","email":"chen@outlook.com","startWorkDate":"2019-03"}
-          },
-          {
-            id: "2c908087694bea8101699d18bbef0057",
-            resumeId: "2c908087694bea8101699d18b9640055",
-            name: "workExperience",
-            content:
-              [{"companyName":"A 公司","domain":"A 行业","dept":"A 部门","title":"A 职位","startDate":"2019-02","endDate":"2019-03","summary":"A 工作内容"},{"companyName":"B 公司","domain":"B 行业","dept":"B 部门","title":"B 职位","startDate":"2019-02","endDate":"2019-09","summary":"B 工作内容"}]
-          },
-          {
-            id: "2c908087694bea8101699d18bbf60058",
-            resumeId: "2c908087694bea8101699d18b9640055",
-            name: "other",
-            content: {"selfdesp":"A 自我描述","socialLink":"A 社交主页"}
-          },
-          {
-            id: "2c908087694bea8101699d18bbf90059",
-            resumeId: "2c908087694bea8101699d18b9640055",
-            name: "education",
-            content:
-              [{"collegeName":"A 学校","startDate":2018,"endDate":2023,"subject":"A 专业","maxGrade":"大专"}]
-          },
-          {
-            id: "2c908087694bea8101699d18bbfa005a",
-            resumeId: "2c908087694bea8101699d18b9640055",
-            name: "projectExperience",
-            content:
-              [{"projectName":"A 项目","title":"A 角色","startDate":"2019-02","endDate":"2019-03","summary":"A A 项目介绍A 项目介绍A 项目介绍A 项目介绍A 项目介绍A 项目介绍A 项目介绍A 项目介绍A 项目介绍A 项目介绍A 项目介绍A 项目介绍A 项目介绍A 项目介绍A 项目介绍A 项目介绍A 项目介绍A 项目介绍A 项目介绍","duty":"个人职责"}]
-          }
-        ]
-      },
+      resumeData: {},
+      basicPersonalData: {},
+      workExperience: {},
+      projectExperience: {},
+      education: {},
+      selfDescription: '',
     };
   },
   created: function() {
     var userId = this.$route.params.id;
-
-    this.$axios.get('view').then(response => {
+    this.$axios.get(`/talent/resume/view/${userId}`).then(response => {
         if (response.success === true) {
-          
+          var sections = response.data.sections.map(function(item) {
+            item.content = JSON.parse(item.content);
+            return item;
+          })
+          this.resumeData = Object.assign({}, this.resumeData, response.data, { sections });
         }
       }).catch(error => {
         console.log(error)
       });
   },
+  watch: {
+    resumeData: {
+      handler: function() {
+        this.processBasicPersonalData();
+        this.processSelfDescription();
+        this.processWorkExperience();
+        this.processProjectExperience();
+        this.processEducation();
+      }, 
+      deep: true,
+    }
+  },
   computed: {
-    basicPersonalData: function() {
+    resumeSectionList: function() {
+      return [this.workExperience, this.projectExperience, this.education]
+    },
+    defaultAvatar: function() {
+      var gender = this.basicPersonalData.sex === true ? 'male' : 'female';
+      return `@/assets/${gender}.png`;
+    }
+  },
+  methods: {
+    processBasicPersonalData: function() {
       var data = this.resumeData;
-      return {
+      this.basicPersonalData = Object.assign({}, this.basicPersonalData, {
         name: data.resume.name,
-        sex: data.resume.sex === true ? 'female' : 'male',
+        sex: data.resume.sex,
         mobile: data.resume.mobilePhone,
-        email: data.sections[0].content.email,
+        email: data.sections[2].content.email,
         imgPath: data.resume.imgPath,
-        studentNo: data.sections[0].content.studentNo,
+        studentNo: data.sections[2].content.studentNo,
         currentCompany: data.sections[1].content[0].companyName,
         currentTitle: data.sections[1].content[0].title,
-        maxGrade: data.sections[3].content[0].maxGrade,
-        age: new Date().getFullYear() - (data.sections[0].content.bornDate.split('-')[0]),
-        yearsOfExperience: new Date().getFullYear() - (data.sections[0].content.startWorkDate.split('-')[0])
-      };
+        maxGrade: data.sections[4].content[0].maxGrade,
+        age: new Date().getFullYear() - (data.sections[2].content.bornDate.split('-')[0]),
+        yearsOfExperience: new Date().getFullYear() - (data.sections[2].content.startWorkDate.split('-')[0])
+      });
     },
-    selfDescription: function() {
-      return this.resumeData.sections[2].content.selfdesp;
+    processSelfDescription: function() {
+      this.selfDescription = this.resumeData.sections[0].content.selfdesp;
     },
-    workExperience: function() {
+    processWorkExperience: function() {
       var data = this.resumeData.sections[1].content;
-      return {
+      this.workExperience = Object.assign({}, this.workExperience, {
         sectionTitle: '工作经历',
         itemList: data.map((item) => ({
           subTitle: [item.companyName, item.dept],
@@ -165,11 +148,11 @@ export default {
           endDate: item.endDate,
           descriptionList: [item.summary],
         })),
-      }
+      });
     },
-    projectExperience: function() {
-      var data = this.resumeData.sections[4].content;
-      return {
+    processProjectExperience: function() {
+      var data = this.resumeData.sections[3].content;
+      this.projectExperience = Object.assign({}, this.projectExperience, {
         sectionTitle: '项目经历',
         itemList: data.map((item) => ({
           subTitle: [item.projectName],
@@ -178,11 +161,11 @@ export default {
           endDate: item.endDate,
           descriptionList: [item.summary, item.duty],
         })),
-      }
+      });
     },
-    education: function() {
-      var data = this.resumeData.sections[3].content[0];
-      return {
+    processEducation: function() {
+      var data = this.resumeData.sections[4].content[0];
+      this.education = Object.assign({}, this.education, {
         sectionTitle: '教育经历',
         itemList: [{
           subTitle: [data.collegeName],
@@ -191,11 +174,8 @@ export default {
           endDate: data.endDate,
           descriptionList: [],
         }],
-      }
+      })
     },
-    resumeSectionList: function() {
-      return [this.workExperience, this.projectExperience, this.education]
-    }
   },
   components: {
     SectionDetails,

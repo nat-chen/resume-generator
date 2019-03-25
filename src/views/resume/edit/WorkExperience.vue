@@ -12,28 +12,24 @@
     >
       <v-text-field
         v-model="item.companyName"
-        :rules="companyNameRules"
         label="公司名称"
         required
       ></v-text-field>
 
       <v-text-field
         v-model="item.domain"
-        :rules="industryRules"
         label="行业"
         required
       ></v-text-field>
 
       <v-text-field
         v-model="item.dept"
-        :rules="departmentRules"
         label="部门"
         required
       ></v-text-field>
 
       <v-text-field
         v-model="item.title"
-        :rules="jobTitleRules"
         label="职位"
         required
       ></v-text-field>
@@ -42,7 +38,6 @@
           <date-picker
             v-model="item.startDate"
             labelName="开始时间"
-            :rules="startTimeRules"
             required>
           ></date-picker>
         </v-flex>
@@ -50,7 +45,6 @@
           <date-picker
             v-model="item.endDate" 
             labelName="结束时间"
-            :rules="endTimeRules"
             required>
           ></date-picker>
         </v-flex>
@@ -58,7 +52,6 @@
       <v-textarea
         auto-grow
         v-model="item.summary"
-        :rules="jobDescriptionRules"
         required
         label="工作内容简介"
         rows="3"
@@ -84,27 +77,6 @@ export default {
   },
   data: function() {
     return {
-      companyNameRules: [
-        value => !!value || '公司名称为必填项'
-      ],
-      industryRules: [
-        value => !!value || '行业为必填项'
-      ],
-      departmentRules: [
-        value => !!value || '部门为必填项'
-      ],
-      jobTitleRules: [
-        value => !!value || '职位为必填项'
-      ],
-      jobDescriptionRules: [
-        value => !!value || '工作内容为必填项'
-      ],
-      startTimeRules: [
-        value => !!value || '开始时间为必选项'
-      ],
-      endTimeRules: [
-        value => !!value || '结束时间为必选项'
-      ],
       isFormValid: true,
       sectionFormData: {
         resumeId: '',

@@ -4,62 +4,148 @@
       class="mx-auto"
       max-width="150"
     >
-    <v-card-title class="pa-2">
-      <span class="title body-1">个人头像</span>
-      <v-spacer></v-spacer>
-      <v-btn small flat icon @click="enlargeAvatar">
-        <v-icon small>zoom_in</v-icon>
-      </v-btn>
-    </v-card-title>
-
-    <v-card-text class="pa-0" v-if="">
-      <v-img :src="imageSrc" aspect-ratio="0.8" class="previewImage"></v-img>
-    </v-card-text>
-
-    <v-flex>
-      <v-card-actions class="blue darken-3 text-xs-center" aspect-ratio="0.8" else>
-      <v-icon class="white--text" large >cloud_upload</v-icon>
-      <span class="white--text subheading">{{ hintText }}</span>
-      <input type="file" 
-        class="imageInput" 
-        ref="imageInput"
-        name="avatar"
-        accept="image/png, image/jpeg, image/jpg"
-        @change="uploadImage"
-      >
-    </v-flex>
-   
-    </v-card-actions>
-  </v-card>
+      <v-card-title class="pa-2">
+        <span class="title body-1">个人头像</span>
+        <v-spacer></v-spacer>
+        <v-btn small flat icon @click="enlargeAvatar">
+          <v-icon small>zoom_in</v-icon>
+        </v-btn>
+      </v-card-title>
+      <div ref="dropArea">
+        <v-hover>
+        <v-card
+          slot-scope="{ hover }"
+          class="mx-auto"
+          color="grey lighten-4"
+        >
+          <v-img
+            :aspect-ratio="0.9"
+            :src="imageSrc | imagePathFilter"
+          >
+          <input type="file" ref="imageInput" accept="image/*" style="display: none;" @change="upload"/>
+            <v-expand-transition>
+              <div
+                v-if="hover"
+                class="d-flex transition-fast-in-fast-out primary v-card--reveal title white--text"
+                style="height: 100%;"
+                @click="uploadImage"
+              >
+                点击/拖动上传
+              </div>
+            </v-expand-transition>
+          </v-img>
+        </v-card>
+      </v-hover>
+      </div>
+    </v-card>
+    <v-layout row justify-center>
+    <v-dialog v-model="dialog" fullscreen hide-overlay transition="dialog-bottom-transition">
+      <v-card class="card-position">
+        <v-img :src="imageSrc | imagePathFilter" aspect-ratio="1.7"></v-img>
+        <v-btn fab color="primary button-position" @click="closeImage"><v-icon>close</v-icon></v-btn>
+      </v-card>
+    </v-dialog>
+  </v-layout>
   </div>
 </template>
 
 <script>
-
+import axios from 'axios';
 
 export default {
+  props: {
+    imgPath: {
+      type: String,
+      default: '',
+    }
+  },
   name: 'imageUpload',
   data: function() {
     return {
       imageSrc: '',
       hintText: '点击/拖动上传',
+      dialog: false,
     }
   },
+  watch: {
+    imgPath: function() {
+      this.imageSrc = this.imgPath
+    }
+  },
+  mounted: function() {
+    this.dropAndDropImage();
+  },
   methods: {
-    uploadImage: function() {
+    upload: function() {
       var file = this.$refs.imageInput.files[0];
       var fileReader  = new FileReader();
+      const formData = new FormData();
       fileReader.onloadend = () => {
-        this.imageSrc = fileReader.result; 
+        formData.append('file_' + Date.now(), file);
+        axios.post('/base/file/upload', formData).then(res => {
+          var path = res.data[0].path;
+          this.imageSrc = path;
+          this.$emit('uploaded-image', path);
+        }).catch(err => console.log(err));
       }
       if (file) {
-          fileReader.readAsDataURL(file); //包含一个data:URL格式的字符串（base64编码）以表示所读取文件的内容。
+        fileReader.readAsDataURL(file); //包含一个data:URL格式的字符串（base64编码）以表示所读取文件的内容。
       } else {
-          this.imageSrc = "";
+        this.imageSrc = "";
       }
-    }
-  }
+    },
+    uploadImage: function() {
+      this.$refs.imageInput.click();
+    },
+    enlargeAvatar: function(){
+      this.dialog = true;
+    },
+    closeImage: function() {
+      this.dialog = false;
+    },
+    dropAndDropImage: function() {
+      var dropArea = this.$refs.dropArea;
+      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, this.preventDefaults, false)   
+        document.body.addEventListener(eventName, this.preventDefaults, false)
+      });
+      dropArea.addEventListener('drop', this.handleDrop, false)
+    },
+    preventDefaults: function(event) {
+      event.preventDefault()
+      event.stopPropagation()
+    },
+    handleDrop: function(event) {
+      var dt = event.dataTransfer
+      var files = dt.files
+    },
+    handleFiles: function(files) {
+        files = [...files]
+        files.forEach(uploadFile)
+        files.forEach(previewFile)
+      }
+    },
+    previewImage: function(file) {
+      let reader = new FileReader()
+      reader.readAsDataURL(file)
+      reader.onloadend = () => {
+        img.src = reader.result
+      }
+    },
+    uploadFile: function(file) {
+      var url = 'https://api.cloudinary.com/v1_1/joezimim007/image/upload'
+      var xhr = new XMLHttpRequest()
+      var formData = new FormData()
+      xhr.open('POST', url, true)
+      xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest')
+      xhr.upload.addEventListener("progress", function(event) {
+        console.log(event)
+      })
 
+      formData.append('upload_preset', 'ujpu6gyk')
+      formData.append('file', file)
+      xhr.send(formData)
+    }
 }
 </script>
 <style lang="scss" scoped>
@@ -68,5 +154,26 @@ export default {
   display: none;
 }
 
+.v-card--reveal {
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  width: 100%;
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+}
+
+.button-position {
+  position: absolute;
+  bottom: 30%;
+  left: 43%
+}
 </style>
 

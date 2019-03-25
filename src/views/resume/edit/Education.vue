@@ -12,7 +12,6 @@
     >
       <v-text-field
         v-model="item.collegeName"
-        :rules="schoolNameRules"
         label="学校名称"
         required
       ></v-text-field>
@@ -32,7 +31,6 @@
 
       <v-text-field
         v-model="item.subject"
-        :rules="majorRules"
         label="专业"
         required
       ></v-text-field>
@@ -61,21 +59,6 @@ export default {
   data: function() {
     return {
       isFormValid: true,
-      schoolNameRules: [
-        value => !!value || '学校名称为必填项',
-      ],
-      startTimeRules: [
-        value => !!value || '开始时间为必选项',
-      ],
-      endTimeRules: [
-        value => !!value || '结束时间为必选项',
-      ],
-      majorRules: [
-        value => !!value || '专业为必填项',
-      ],
-      degreeRules: [
-        value => !!value || '学历为必选项',
-      ],
       sectionFormData: {
         resumeId: '',
         sectionName: 'education',

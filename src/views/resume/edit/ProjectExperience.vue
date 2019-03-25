@@ -12,14 +12,12 @@
     >
       <v-text-field
         v-model="item.projectName"
-        :rules="projectNameRules"
         label="项目名称"
         required
       ></v-text-field>
 
       <v-text-field
         v-model="item.title"
-        :rules="roleRules"
         label="角色"
         required
       ></v-text-field>
@@ -29,7 +27,6 @@
           <date-picker 
             v-model="item.startDate"
             labelName="开始时间"
-            :rules="startTimeRules"
             required
           ></date-picker>
         </v-flex>
@@ -37,7 +34,6 @@
           <date-picker 
             v-model="item.endDate"
             labelName="结束时间"
-            :rules="endTimeRules"
             required
           ></date-picker>
         </v-flex>
@@ -78,24 +74,6 @@ export default {
   data: function() {
     return {
       isFormValid: true,
-      projectNameRules: [
-        value => !!value || '项目名称为必填项'
-      ],
-      roleRules: [
-        value => !!value || '角色为必填项'
-      ],
-      projectIntroductionRules: [
-        value => !!value || '项目介绍为必填项'
-      ],
-      jresponsibilityRules: [
-        value => !!value || '个人职责为必填项'
-      ],
-      startTimeRules: [
-        value => !!value || '开始时间为必选项'
-      ],
-      endTimeRules: [
-        value => !!value || '结束时间为必选项'
-      ],
       sectionFormData: {
         resumeId: '',
         sectionName: 'projectExperience',

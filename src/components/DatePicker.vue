@@ -61,7 +61,6 @@ export default {
   watch: {
     value: function(newValue) {
       this.date = newValue;
-      console.log(this.date);
     }
   },
   methods: {

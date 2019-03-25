@@ -11,13 +11,11 @@
         name="selfIntroduction"
         label="自我描述"
         rows="3"
-        :rules="selfIntroductionRules"
         hint="不少于20个字"
       ></v-textarea>
 
       <v-text-field
         v-model="sectionFormData.sectionContent.socialLink"
-        :rules="socialNetworkRules"
         label="社交主页"
         required
       ></v-text-field>
@@ -38,12 +36,6 @@ export default {
       isValidForm: '',
       selfIntroduction: '',
       socialNetwork: '',
-      selfIntroductionRules: [
-        value => !!value || '自我描述为必填项'
-      ],
-      socialNetworkRules: [
-        value => !!value || '社交主页'
-      ],
       sectionFormData: {
         resumeId: '',
         sectionName: 'other',

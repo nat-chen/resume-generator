@@ -38,6 +38,7 @@ export default {
     },
     isSnackbarShow: {
       type: Boolean,
+      default: false,
     }
   },
   data: function() {
@@ -47,11 +48,12 @@ export default {
   },
   watch: {
     snackbar: function(value) {
-      console.log(1);
       if (value === false) {
-        console.log(2);
         this.$emit('snackbar-display', false);
       }
+    },
+    isSnackbarShow: function(value) {
+      this.snackbar = value;
     }
   }
 }

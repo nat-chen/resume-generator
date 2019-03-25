@@ -7,21 +7,18 @@
     >
       <v-text-field
         v-model="sectionFormData.resume.name"
-        :rules="nameRules"
         label="姓名"
         required
       ></v-text-field>
 
       <v-text-field
         v-model="sectionFormData.resume.mobilePhone"
-        :rules="mobileRules"
         label="手机号"
         required
       ></v-text-field>
 
       <v-text-field
         v-model="sectionFormData.section.sectionContent.studentNo"
-        :rules="studentIdRules"
         label="学号"
         required
       ></v-text-field>
@@ -29,24 +26,21 @@
       <date-picker
         v-model="sectionFormData.section.sectionContent.bornDate"
         labelName="出生年月"
-        :rules="bornDateRules"
         required
       ></date-picker>
-      <v-radio-group v-model="sectionFormData.resume.sex" :mandatory="false" row>
+      <v-radio-group v-model="gender" :mandatory="false" row>
         <v-radio label="男" value="true"></v-radio>
         <v-radio label="女" value="false"></v-radio>
       </v-radio-group>
 
       <v-text-field
         v-model="sectionFormData.section.sectionContent.workCity"
-        :rules="cityRules"
         label="所在城市"
         required
       ></v-text-field>
 
       <v-text-field
         v-model="sectionFormData.section.sectionContent.email"
-        :rules="emailRules"
         label="邮箱"
         required
       ></v-text-field>
@@ -54,7 +48,6 @@
       <date-picker
         v-model="sectionFormData.section.sectionContent.startWorkDate"
         labelName="参加工作时间"
-        :rules="startWorkDateRules"
         required
       ></date-picker> 
 
@@ -75,29 +68,6 @@ export default {
   data: function() {
     return {
       isFormValid: true,
-      nameRules: [
-        value => !!value || '姓名为必填项',
-      ],
-      emailRules: [
-        value => !!value || '邮箱为必填项',
-        value => /.+@.+\..+/.test(value) || '邮箱格式无效'
-      ],
-      mobileRules: [
-        value => !!value || '手机号为必填项',
-        value => /^1[3-9][0-9]{9}$/.test(value) || '手机号码格式无效'
-      ],
-      studentIdRules: [
-        value => !!value || '学号为必填项',
-      ],
-      cityRules: [
-        value => !!value || '城市为必填项',
-      ],
-      bornDateRules: [
-        value => !!value || '出生年月为必选项',
-      ],
-      startWorkDateRules: [
-        value => !!value || '参加工作时间为必选项',
-      ],
       sectionFormData: {
         section: {
           resumeId: '',
@@ -108,7 +78,7 @@ export default {
           id:"",
           userId:"",
           name:"",
-          sex: true,
+          sex: false,
           age: '',
           province: "",
           city: "",
@@ -118,6 +88,16 @@ export default {
         },
       },
     }
+  },
+  computed: {
+    gender: {
+      get: function() {
+        return (this.sectionFormData.resume.sex === false) ? "false" : "true";
+      },
+      set: function(value) {
+        this.sectionFormData.resume.sex = Boolean(value);
+      }
+    },
   },
   watch: {
     mergeBasicData: {

@@ -30,7 +30,9 @@
           {{ item.startDate}} - {{ item.endDate }}
         </span>
       </v-card-text>
+      <v-divider></v-divider>
     </v-card>
+    <v-divider></v-divider>
   </v-card>
 </template>
 
