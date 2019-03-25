@@ -5,7 +5,7 @@
     </v-btn>
 
     <v-form class="grey lighten-3 my-4 pa-2" 
-      v-for="(item, index) in formData.sectionContent" :key="index"
+      v-for="(item, index) in sectionFormData.sectionContent" :key="index"
       ref="form"
       v-model="isFormValid"
       lazy-validation
@@ -106,26 +106,24 @@ export default {
         value => !!value || '结束时间为必选项'
       ],
       isFormValid: true,
+      sectionFormData: {
+        resumeId: '',
+        sectionName: 'workExperience',
+        sectionContent: [{companyName: "", domain: "", dept: "", title: "", startDate: "", endDate: "", summary: ""}],
+      },
     }
   },
-  computed: {
-    formData: function() {
-      var sectionTemplate = {
-        resumeId: "",
-        sectionName: "workExperience",
-        sectionContent: [{companyName: "", domain: "", dept: "", title: "", startDate: "", endDate: "", summary: ""}],
-      }
-      if (this.workExperienceData.resumeId !== undefined) {
-        sectionTemplate.resumeId = this.workExperienceData.resumeId;
-        sectionTemplate.sectionName = this.workExperienceData.name;
-        sectionTemplate.sectionContent =this.workExperienceData.content;
-      }
-      return sectionTemplate;
-    },
+  watch: {
+    workExperienceData: {
+      handler: function(newValue) {
+        this.sectionFormData = Object.assign({}, this.sectionFormData, newValue);
+      },
+      deep: true,
+    }
   },
   created: function() {
     this.$eventBus.$on('save-form', () => {
-      this.$emit('save-form-data', this.formData);
+      this.$emit('save-form-data', this.sectionFormData);
     });
   },
   beforeDestroy: function() {
@@ -133,14 +131,11 @@ export default {
   },
   methods: {
     addNewItem: function() {
-      var oldData = this.formData.sectionContent;
-      var newItem = oldData.slice(-1).map((item) => {
-        item = '';
-      });
-      oldData.push(newItem);
+      var newItem = {companyName: "", domain: "", dept: "", title: "", startDate: "", endDate: "", summary: ""};
+      this.sectionFormData.sectionContent.push(newItem);
     },
     deleteSelectedItem: function(index) {
-      this.formData.sectionContent.splice(index, 1);
+      this.sectionFormData.sectionContent.splice(index, 1);
     },
   },
   components: {

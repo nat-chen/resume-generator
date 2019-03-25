@@ -6,7 +6,7 @@
       lazy-validation
     >
       <v-textarea
-        v-model="formData.sectionContent.selfdesp"
+        v-model="sectionFormData.sectionContent.selfdesp"
         auto-grow
         name="selfIntroduction"
         label="自我描述"
@@ -16,7 +16,7 @@
       ></v-textarea>
 
       <v-text-field
-        v-model="formData.sectionContent.socialLink"
+        v-model="sectionFormData.sectionContent.socialLink"
         :rules="socialNetworkRules"
         label="社交主页"
         required
@@ -29,7 +29,7 @@
 <script>
 export default {
    props: {
-    othersData: {
+    otherData: {
       type: Object,
     }
   },
@@ -43,27 +43,30 @@ export default {
       ],
       socialNetworkRules: [
         value => !!value || '社交主页'
-      ]
+      ],
+      sectionFormData: {
+        resumeId: '',
+        sectionName: 'other',
+        sectionContent: { selfdesp: "", socialLink: "" },
+      },
+    }
+  },
+  watch: {
+    otherData: {
+      handler: function(newValue) {
+        this.sectionFormData = Object.assign({}, this.sectionFormData, newValue);
+      },
+      deep: true,
     }
   },
   computed: {
-    formData: function() {
-      var sectionTemplate = {
-        resumeId: "",
-        sectionName: "other",
-        sectionContent: { selfdesp: "", socialLink: "" }
-      }
-      if (this.othersData.resumeId !== undefined) {
-        sectionTemplate.resumeId = this.othersData.resumeId;
-        sectionTemplate.sectionName = this.othersData.name;
-        sectionTemplate.sectionContent =this.othersData.content;
-      }
-      return sectionTemplate;
+    _sectionFormData: function() {
+      this.sectionFormData = Object.assign({}, this.sectionFormData, this.otherData);
     },
   },
   created: function() {
     this.$eventBus.$on('save-form', () => {
-      this.$emit('save-form-data', this.formData);
+      this.$emit('save-form-data', this.sectionFormData);
     });
   },
   beforeDestroy: function() {

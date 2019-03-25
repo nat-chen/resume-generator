@@ -21,8 +21,11 @@
 
         <v-text-field
           v-model="password"
+          :append-icon="isShowPassword ? 'visibility' : 'visibility_off'"
+          :type="isShowPassword ? 'text' : 'password'"
           :rules="passwordRules"
           label="密码"
+          @click:append="isShowPassword = !isShowPassword"
           required
         ></v-text-field>
       </v-form>
@@ -47,17 +50,24 @@
         </v-btn>
       </v-layout>
     </v-card-actions>
+
+    <snackbar :isSnackbarShow="isSnackbarShow" :snackbarText="snackbarText" @snackbar-display="snackbarDisplay"/>
   </v-card>
 </template>
 
 <script>
+import Snackbar from '@/components/Snackbar.vue';
+
 export default {
   name: 'login',
   data: function() {
     return {
       mobileNumber: '',
       password: '',
-      isFormValid: true,
+      isFormValid: false,
+      isShowPassword: false,
+      snackbarText: '',
+      isSnackbarShow: false,
       mobileRules: [
         value => !!value || '手机号为必填项',
         value => /^1[3-9][0-9]{9}$/.test(value) || '手机号码格式无效'
@@ -69,6 +79,11 @@ export default {
   },
   methods: {
     loginResumeSystem: function() {
+      if (this.$refs.form.validate() === false) {
+        this.snackbarText = '请填写正确格式！'
+        this.isSnackbarShow = true;
+        return;
+      };
       var data = {
         username: this.mobileNumber,
         password: this.password
@@ -78,6 +93,11 @@ export default {
           const user = response.data.user;
           localStorage.setItem(user.account, user.passwd);
           this.$router.push({ path: `/edit/${user.id}` });
+        } else {
+          this.isSnackbarShow = true;
+          console.log("here")
+          this.snackbarText = '登陆失败, Bad credentials!'
+          return;
         }
       }).catch(error => {
         console.log(error)
@@ -86,6 +106,12 @@ export default {
     registerNewAccount: function() {
       this.$eventBus.$emit('registerDialog')
     },
+    snackbarDisplay: function() {
+      this.isSnackbarShow = false;
+    }
+  },
+  components: {
+    Snackbar,
   }
 }
 </script>

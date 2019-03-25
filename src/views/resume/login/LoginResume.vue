@@ -1,7 +1,6 @@
 <template>
   <div class="loginResume">
     <login />
-
     <register />
   </div>
 </template>

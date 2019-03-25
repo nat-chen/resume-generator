@@ -123,6 +123,17 @@ export default {
       },
     };
   },
+  created: function() {
+    var userId = this.$route.params.id;
+
+    this.$axios.get('view').then(response => {
+        if (response.success === true) {
+          
+        }
+      }).catch(error => {
+        console.log(error)
+      });
+  },
   computed: {
     basicPersonalData: function() {
       var data = this.resumeData;

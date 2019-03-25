@@ -6,7 +6,7 @@
     <v-form
       ref="form" class="grey lighten-3 my-4 pa-2"
       v-model="isFormValid"
-      v-for="(item, index) in formData.sectionContent"
+      v-for="(item, index) in sectionFormData.sectionContent"
       :key="index"
       lazy-validation
     >
@@ -42,7 +42,6 @@
           ></date-picker>
         </v-flex>
       </v-layout>
-      
       <v-textarea
         v-model="item.summary"
         auto-grow
@@ -97,26 +96,24 @@ export default {
       endTimeRules: [
         value => !!value || '结束时间为必选项'
       ],
+      sectionFormData: {
+        resumeId: '',
+        sectionName: 'projectExperience',
+        sectionContent: [{projectName: "", title: "", startDate: "", endDate: "", summary: "", duty: ""}],
+      },
     }
   },
-  computed: {
-    formData: function() {
-      var sectionTemplate = {
-        resumeId: "",
-        sectionName: "projectExperience",
-        sectionContent: [{projectName: "", title: "", startDate: "", endDate: "", summary: "", duty: ""}]
-      }
-      if (this.projectExperienceData.resumeId !== undefined) {
-        sectionTemplate.resumeId = this.projectExperienceData.resumeId;
-        sectionTemplate.sectionName = this.projectExperienceData.name;
-        sectionTemplate.sectionContent =this.projectExperienceData.content;
-      }
-      return sectionTemplate;
-    },
+  watch: {
+    projectExperienceData: {
+      handler: function(newValue) {
+        this.sectionFormData = Object.assign({}, this.sectionFormData, newValue);
+      },
+      deep: true,
+    }
   },
   created: function() {
     this.$eventBus.$on('save-form', () => {
-      this.$emit('save-form-data', this.formData);
+      this.$emit('save-form-data', this.sectionFormData);
     });
   },
   beforeDestroy: function() {
@@ -124,14 +121,11 @@ export default {
   },
   methods: {
     addNewItem: function() {
-      var oldData = this.formData.sectionContent;
-      var newItem = oldData.slice(-1).map((item) => {
-        item = '';
-      });
-      oldData.push(newItem);
+      var newItem = {projectName: "", title: "", startDate: "", endDate: "", summary: "", duty: ""};
+      this.sectionFormData.sectionContent.push(newItem);
     },
     deleteSelectedItem: function(index) {
-      this.formData.sectionContent.splice(index, 1);
+      this.sectionFormData.sectionContent.splice(index, 1);
     },
   },
   components: {

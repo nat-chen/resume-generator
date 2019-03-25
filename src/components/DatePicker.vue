@@ -23,7 +23,8 @@
     <v-date-picker 
       v-model="date" 
       :type="datePickerType" 
-      locale="zh-cn" 
+      locale="zh-cn"
+      :reactive="reactive"
       no-title scrollable>
       <v-spacer></v-spacer>
       <v-btn flat color="primary" @click="savePickedDate">OK</v-btn>
@@ -45,11 +46,22 @@ export default {
       type: String,
       required: true,
     },
+    value: {
+      type: String,
+      default: new Date().toISOString().substr(0, 10),
+    }
   },
   data: function() {
     return {
-      date: null,
+      date: this.value,
       datePicker: false,
+      reactive: true,
+    }
+  },
+  watch: {
+    value: function(newValue) {
+      this.date = newValue;
+      console.log(this.date);
     }
   },
   methods: {

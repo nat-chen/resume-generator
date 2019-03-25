@@ -5,7 +5,7 @@
     </v-btn>
     <v-form class="grey lighten-3 my-4 pa-2"
       ref="form"
-      v-for="(item, index) in formData.sectionContent"
+      v-for="(item, index) in sectionFormData.sectionContent"
       :key="index"
       v-model="isFormValid"
       lazy-validation
@@ -76,22 +76,22 @@ export default {
       degreeRules: [
         value => !!value || '学历为必选项',
       ],
+      sectionFormData: {
+        resumeId: '',
+        sectionName: 'education',
+        sectionContent: [{collegeName: "", startDate: "", endDate: "", subject: "", maxGrade: ""}],
+      },
+    }
+  },
+  watch: {
+    educationData: {
+      handler: function(newValue) {
+        this.sectionFormData = Object.assign({}, this.sectionFormData, newValue);
+      },
+      deep: true,
     }
   },
   computed: {
-    formData: function() {
-      var sectionTemplate = {
-        resumeId: "",
-        sectionName: "education",
-        sectionContent: [{collegeName: "", startDate: "", endDate: "", subject: "", maxGrade: ""}]
-      }
-      if (this.educationData.resumeId !== undefined) {
-        sectionTemplate.resumeId = this.educationData.resumeId;
-        sectionTemplate.sectionName = this.educationData.name;
-        sectionTemplate.sectionContent =this.educationData.content;
-      }
-      return sectionTemplate;
-    },
     startTimeList: function() {
       return Array.from({length: 69}, function(item, index) {
         return 2019 - index;
@@ -108,7 +108,7 @@ export default {
   },
   created: function() {
     this.$eventBus.$on('save-form', () => {
-      this.$emit('save-form-data', this.formData);
+      this.$emit('save-form-data', this.sectionFormData);
     });
   },
   beforeDestroy: function() {
@@ -116,14 +116,11 @@ export default {
   },
   methods: {
     addNewItem: function() {
-      var oldData = this.formData.sectionContent;
-      var newItem = oldData.slice(-1).map((item) => {
-        item = '';
-      });
-      oldData.push(newItem);
+      var newItem = {collegeName: "", startDate: "", endDate: "", subject: "", maxGrade: ""};
+      this.sectionFormData.sectionContent.push(newItem);
     },
     deleteSelectedItem: function(index) {
-      this.formData.sectionContent.splice(index, 1);
+      this.sectionFormData.sectionContent.splice(index, 1);
     },
 
   },

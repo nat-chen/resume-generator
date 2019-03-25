@@ -2,23 +2,29 @@
   <v-dialog v-model="registerDialog" max-width="500px">
     <v-card>
       <v-card-text>
-        <v-text-field
-          v-model="mobileNumber"
-          :rules="mobileRules"
-          label="手机号"
-          required
-        ></v-text-field>
+        <v-form
+          ref="form"
+          v-model="isFormValid"
+          lazy-validation
+        >
+          <v-text-field
+            v-model="mobileNumber"
+            :rules="mobileRules"
+            label="手机号"
+            required
+          ></v-text-field>
 
-        <v-text-field
-          v-model="password"
-          :append-icon="isShow ? 'visibility' : 'visibility_off'"
-          :type="isShow ? 'text' : 'password'"
-          :rules="passwordRules"
-          hint="最少 8 位字符"
-          label="密码"
-          @click:append="isShow = !isShow"
-          required
-        ></v-text-field>
+          <v-text-field
+            v-model="password"
+            :append-icon="isShow ? 'visibility' : 'visibility_off'"
+            :type="isShow ? 'text' : 'password'"
+            :rules="passwordRules"
+            hint="最少 8 位字符"
+            label="密码"
+            @click:append="isShow = !isShow"
+            required
+          ></v-text-field>
+        </v-form>
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
@@ -37,6 +43,7 @@ export default {
       mobileNumber: '',
       password: '',
       isShow: false,
+      isFormValid: false,
       mobileRules: [
         value => !!value || '手机号为必填项',
         value => /^1[3-9][0-9]{9}$/.test(value) || '手机号码格式无效'
@@ -57,17 +64,25 @@ export default {
   },
   methods: {
     createNewAccount: function() {
+      if (this.$refs.form.validate() === false) {
+        this.snackbarText = '请填写正确格式！'
+        this.snackbar = true;
+        return;
+      };
       var data = {
         password: this.password,
         username: this.mobileNumber
       };
       this.$axios.post('register', data).then(response => {
         if (response.success === true) {
-          console.log(response);
+          const user = response.data.user;
+          this.$router.push({ path: `/edit/${user.id}` });
+          this.registerDialog = false;
         } else if (response.msg === '用户已存在') {
-          console.log('用户已存在')
+          this.snackbarText = '用户已存在！'
+          this.snackbar = true;
         }
-        this.registerDialog = false;
+        
       }).catch(error => {
         console.log(error)
       });
