@@ -76,8 +76,10 @@ export default {
   },
   computed: {
     startTimeList: function() {
-      return Array.from({length: 69}, function(item, index) {
-        return 2019 - index;
+      return Array.from({length: 69}, function(item, index) { 
+        
+        let currentYear = new Date().getFullYear();
+        return currentYear - index;
       });
     },
     endTimeList: function() {
@@ -90,12 +92,12 @@ export default {
     }
   },
   created: function() {
-    this.$eventBus.$on('save-form', () => {
-      this.$emit('save-form-data', this.sectionFormData);
+    this.$eventBus.$on('save-form-data', () => {
+      this.$emit('save-current-form', this.sectionFormData);
     });
   },
   beforeDestroy: function() {
-    this.$eventBus.$off('save-form');
+    this.$eventBus.$off('save-form-data');
   },
   methods: {
     addNewItem: function() {

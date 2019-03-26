@@ -22,18 +22,17 @@ export default {
     }
   },
   created: function() {
-    this.$eventBus.$on('is-logging', (value) => {
+    this.$eventBus.$on('is-logging-snackbar', (value) => {
       this.isLogging = value;
     });
-    this.$eventBus.$on('invalid-status', (value, text) => {
-      console.log(arguments)
+    this.$eventBus.$on('invalid-status-login', (value, text) => {
       this.isSnackbarShow = value;
       this.snackbarText = text;
     });
   },
   beforeDestroy: function() {
-    this.$eventBus.$off('is-logging');
-    this.$eventBus.$off('invalid-status')
+    this.$eventBus.$off('is-logging-snackbar');
+    this.$eventBus.$off('invalid-status-login')
   },
   methods: {
     snackbarDisplay: function() {

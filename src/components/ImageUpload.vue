@@ -5,10 +5,10 @@
       max-width="150"
     >
       <v-card-title class="pa-2">
-        <span class="title body-1">个人头像</span>
+        <span class="subtitle-1">个人头像</span>
         <v-spacer></v-spacer>
-        <v-btn small flat icon @click="enlargeAvatar">
-          <v-icon small>zoom_in</v-icon>
+        <v-btn class="pa-0 ma-0" small flat icon @click="enlargeAvatar">
+          <v-icon>zoom_in</v-icon>
         </v-btn>
       </v-card-title>
       <div ref="dropArea">
@@ -26,11 +26,14 @@
             <v-expand-transition>
               <div
                 v-if="hover"
-                class="d-flex transition-fast-in-fast-out primary v-card--reveal title white--text"
+                class="transition-fast-in-fast-out primary v-card--reveal title white--text"
                 style="height: 100%;"
-                @click="uploadImage"
+                @click="uploadImageListener"
               >
-                点击/拖动上传
+                <p>{{ progressStatus }}</p>
+                <v-icon large color="white">fa-arrow-circle-up</v-icon>
+                <br>
+                <p>点击/拖动上传</p>
               </div>
             </v-expand-transition>
           </v-img>
@@ -65,6 +68,7 @@ export default {
       imageSrc: '',
       hintText: '点击/拖动上传',
       dialog: false,
+      progressStatus: '',
     }
   },
   watch: {
@@ -78,6 +82,12 @@ export default {
   methods: {
     upload: function(event, file) {
       var file = file || this.$refs.imageInput.files[0];
+      var validImageTypes = ['image/gif', 'image/jpeg', 'image/png'];
+      if (!validImageTypes.includes(file && file.type)) {
+        this.$eventBus.$emit('invalid-staus-edit', true, '上传文件仅限图片，请重新选择！');
+        return;
+      }
+
       var fileReader  = new FileReader();
       const formData = new FormData();
       fileReader.onloadend = () => {
@@ -85,16 +95,26 @@ export default {
         axios.post('/base/file/upload', formData).then(res => {
           var path = res.data[0].path;
           this.imageSrc = path;
-          this.$emit('uploaded-image', path);
+          this.$emit('image-updated', path);
         }).catch(err => console.log(err));
-      }
+      };
+      fileReader.onprogress = (event) => {
+        if (event.lengthComputable) {
+          this.progressStatus = `${(event.loaded / event.total) * 100}%`
+          if (this.progressStatus === '100%') {
+            setTimeout(() => {
+              this.progressStatus = '';
+            }, 1000);
+          }
+        }
+    };
       if (file) {
         fileReader.readAsDataURL(file); //包含一个data:URL格式的字符串（base64编码）以表示所读取文件的内容。
       } else {
         this.imageSrc = "";
       }
     },
-    uploadImage: function() {
+    uploadImageListener: function() {
       this.$refs.imageInput.click();
     },
     enlargeAvatar: function(){
@@ -136,7 +156,9 @@ export default {
 .v-card--reveal {
   align-items: center;
   justify-content: center;
-  position: absolute;
+  flex-direction: column;
+  display: flex;
+  // position: absolute;
   width: 100%;
 }
 

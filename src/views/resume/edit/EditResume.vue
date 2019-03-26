@@ -1,13 +1,13 @@
 <template>
   <v-container fluid pa-0>
-    <toolbar @save-resume-data="saveResumeData"></toolbar>
+    <toolbar @submit-resume="submitResume"></toolbar>
     <v-stepper vertical non-linear>
       <v-stepper-step step="1" editable>
         基本信息
       </v-stepper-step>
       <v-stepper-content step="1">
-        <image-upload @uploaded-image="uploadedImage" :imgPath="imgPath" />
-        <basic-personal-info :mergeBasicData="mergeBasicData" @save-form-data="saveFormData"/>
+        <image-upload @imageUpdated="imageUpdated" :imgPath="imgPath" />
+        <basic-personal-info :mergeBasicData="mergeBasicData" @save-current-form="saveCurrentForm"/>
       </v-stepper-content>
 
       <v-stepper-step step="2" editable>
@@ -15,7 +15,7 @@
       </v-stepper-step>
 
       <v-stepper-content step="2">
-        <work-experience  :workExperienceData="workExperienceData" @save-form-data="saveFormData"/>
+        <work-experience  :workExperienceData="workExperienceData" @save-current-form="saveCurrentForm"/>
       </v-stepper-content>
 
       <v-stepper-step step="3" editable>
@@ -23,21 +23,21 @@
       </v-stepper-step>
 
       <v-stepper-content step="3">
-        <project-experience :projectExperienceData="projectExperienceData" @save-form-data="saveFormData"/>
+        <project-experience :projectExperienceData="projectExperienceData" @save-current-form="saveCurrentForm"/>
       </v-stepper-content>
 
       <v-stepper-step step="4" editable>
         教育经历
       </v-stepper-step>
       <v-stepper-content step="4">
-        <education :educationData="educationData" @save-form-data="saveFormData"/>
+        <education :educationData="educationData" @save-current-form="saveCurrentForm"/>
       </v-stepper-content>
 
       <v-stepper-step step="5" editable>
         其他
       </v-stepper-step>
       <v-stepper-content step="5">
-         <others :otherData="otherData" @save-form-data="saveFormData"/>
+         <others :otherData="otherData" @save-current-form="saveCurrentForm"/>
       </v-stepper-content>
       
     </v-stepper>
@@ -88,15 +88,19 @@ import Others from './Others.vue';
       }).catch(error => {
         this.isSnackbarShow = true;
       });
+      this.$eventBus.$on('invalid-staus-edit', (value, text) => {
+        this.isSnackbarShow = value;
+        this.snackbarText = text;
+      });
     },
     beforeDestroy: function() {
-
+      this.$eventBus.$off('invalid-staus-edit');
     },
     methods: {
-      uploadedImage: function(path) {
+      imageUpdated: function(path) {
         this.$set(this.basicData, 'imgPath', path);
       },
-      saveResumeData: function() {
+      submitResume: function() {
           this.$axios.post('resume', this.basicData).then(response => {
             if (response.success === true) {
               let resumeId = response.data.id;
@@ -119,7 +123,7 @@ import Others from './Others.vue';
             console.log(error)
           });
       },
-      saveFormData: function(data) {
+      saveCurrentForm: function(data) {
         if (data.resume !== undefined) {
           this.basicData = data.resume;
           this.baseExtendData = data.section;

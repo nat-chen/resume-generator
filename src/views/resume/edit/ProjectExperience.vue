@@ -90,12 +90,12 @@ export default {
     }
   },
   created: function() {
-    this.$eventBus.$on('save-form', () => {
-      this.$emit('save-form-data', this.sectionFormData);
+    this.$eventBus.$on('save-form-data', () => {
+      this.$emit('save-current-form', this.sectionFormData);
     });
   },
   beforeDestroy: function() {
-    this.$eventBus.$off('save-form');
+    this.$eventBus.$off('save-form-data');
   },
   methods: {
     addNewItem: function() {

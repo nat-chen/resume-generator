@@ -16,12 +16,12 @@
 
           <v-text-field
             v-model="password"
-            :append-icon="isShow ? 'visibility' : 'visibility_off'"
-            :type="isShow ? 'text' : 'password'"
+            :append-icon="isShowPassword ? 'visibility' : 'visibility_off'"
+            :type="isShowPassword ? 'text' : 'password'"
             :rules="passwordRules"
             hint="最少 8 位字符"
             label="密码"
-            @click:append="isShow = !isShow"
+            @click:append="isShowPassword = !isShowPassword"
             required
           ></v-text-field>
         </v-form>
@@ -42,7 +42,7 @@ export default {
       registerDialog: false,
       mobileNumber: '',
       password: '',
-      isShow: false,
+      isShowPassword: false,
       isFormValid: false,
       mobileRules: [
         value => !!value || '手机号为必填项',
@@ -55,17 +55,17 @@ export default {
     }
   },
   created: function() {
-    this.$eventBus.$on('registerDialog', () => {
+    this.$eventBus.$on('show-register-dialog', () => {
       this.registerDialog = true;
     })
   },
   beforeDestroy: function() {
-    this.$eventBus.$off('registerDialog');
+    this.$eventBus.$off('show-register-dialog');
   },
   methods: {
     createNewAccount: function() {
       if (this.$refs.form.validate() === false) {
-        this.$eventBus.$emit('invalid-status', true, '请填写正确格式！');
+        this.$eventBus.$emit('invalid-status-login', true, '请填写正确格式！');
         return;
       };
       var data = {
@@ -80,7 +80,7 @@ export default {
           this.registerDialog = false;
           this.$eventBus.$emit('is-logging', false);
         } else if (response.msg === '用户已存在') {
-          this.$eventBus.$emit('invalid-status', true, '用户已存在');
+          this.$eventBus.$emit('invalid-status-login', true, '用户已存在');
           this.$eventBus.$emit('is-logging', false);
         }
         

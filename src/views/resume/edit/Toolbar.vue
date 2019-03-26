@@ -55,8 +55,8 @@ export default {
   },
   methods: {
     submitResumeData: function() {
-      this.$eventBus.$emit('save-form');
-      this.$emit('save-resume-data');
+      this.$eventBus.$emit('save-form-data');
+      this.$emit('submit-resume');
     },
     shareResume: function() {
       this.shareResumeDialog = true;

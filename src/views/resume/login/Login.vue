@@ -6,7 +6,6 @@
           <h3 class="headline mb-0">登录简历管理系统</h3>
         </div>
       </v-card-title>
-
       <v-card-text>
         <v-form
           ref="form"
@@ -71,37 +70,39 @@ export default {
       ],
       passwordRules: [
         value => !!value || '密码为必填项',
+        value => value.length >= 8 || '最少 8 位字符'
       ],
     }
   },
   methods: {
     loginResumeSystem: function() {
       if (this.$refs.form.validate() === false) {
-        this.$eventBus.$emit('invalid-status', true, '请填写正确格式！');
+        this.$eventBus.$emit('invalid-status-login', true, '请填写正确格式！');
         return;
       };
-      var data = {
+      const data = {
         username: this.mobileNumber,
         password: this.password
       }
-      this.$eventBus.$emit('is-logging', true);
+      this.$eventBus.$emit('is-logging-snackbar', true);
+      this.axiosRequest(data);
+    },
+    axiosRequest: function(data) {
       this.$axios.post('login', data).then(response => {
         if (response.success === true) {
           const user = response.data.user;
           localStorage.setItem(user.account, user.passwd);
           this.$router.push({ path: `/edit/${user.id}` });
-          this.$eventBus.$emit('is-logging', false);
         } else {
-          this.$eventBus.$emit('invalid-status', true, '登陆失败, Bad credentials!');
-          this.$eventBus.$emit('is-logging', false);
-          return;
+          this.$eventBus.$emit('invalid-status-login', true, '登陆失败, Bad credentials!');
         }
+        this.$eventBus.$emit('is-logging-snackbar', false);
       }).catch(error => {
-        console.log(error)
+        this.$eventBus.$emit('invalid-status-login', true, '登陆失败');
       });
     },
     registerNewAccount: function() {
-      this.$eventBus.$emit('registerDialog')
+      this.$eventBus.$emit('show-register-dialog')
     },
   },
 }
